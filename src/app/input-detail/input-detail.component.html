@@ -1,0 +1,109 @@
+<div class="container" [formGroup]="form">
+    <div class="card mt-4 mb-4">
+        <div class="card-header">
+            Input Detail
+        </div>
+        <div class="card-body">
+            <div class="card">
+                <div class="card-header">
+                    1. Tax Filing Detail
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Type of filling</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="filingType" id="ordinaryFiling" value="0" [formControlName]="'filingType'"
+                                [class.is-invalid]="(form.get('filingType').touched || form.get('filingType').dirty) && form.get('filingType').errors?.['required']"
+                            >
+                            <label class="form-check-label" for="ordinaryFiling">Ordinary Filing</label>
+                            <span class="invalid-feedback" *ngIf="(form.get('filingType').touched || form.get('filingType').dirty) && form.get('filingType').errors?.['required']">filingType is required</span>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="filingType" id="additionalFiling" value="1" [formControlName]="'filingType'">
+                            <label class="form-check-label" for="additionalFiling">Additional Filing</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Vat Month</label>
+                        <select class="custom-select" [formControlName]="'month'"
+                        [class.is-invalid]="(form.get('month').touched || form.get('month').dirty) && form.get('month').errors?.['required']">
+                            <option [value]="undefined" selected>----- month -----</option>
+                            <option *ngFor="let item of months" [value]= "item.value">{{item.title}}</option>
+                        </select>
+                        <span class="invalid-feedback" *ngIf="(form.get('month').touched || form.get('month').dirty) && form.get('month').errors?.['required']">month is required</span>
+                        <select class="custom-select mt-2" [formControlName]="'year'"
+                        [class.is-invalid]="(form.get('year').touched || form.get('year').dirty) && form.get('year').errors?.['required']">
+                            <option [value]="undefined" selected>----- year -----</option>
+                            <option *ngFor="let item of years" [value]= "item">{{item}}</option>
+                        </select>
+                        <span class="invalid-feedback" *ngIf="(form.get('year').touched || form.get('year').dirty) && form.get('year').errors?.['required']">year is required</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-4">
+                <div class="card-header">
+                    2. Tax Computational
+                </div>
+                <div class="card-body">
+                    <ng-container [ngSwitch]="filingType">
+                        <ng-container *ngSwitchCase="'0'">
+                            <div class="form-group">
+                                <label>Total value of taxable electronic service exclusive of VAT</label>
+                                <input type="text" class="form-control text-right" placeholder="THB" [formControlName]="'saleAmount'"
+                                [class.is-invalid]="(form.get('saleAmount').touched || form.get('saleAmount').dirty) && form.get('saleAmount').errors?.['required']"
+                                appDecimalMask (blur)="calculateTaxAmount()"
+                                >
+                                <span class="invalid-feedback" *ngIf="(form.get('saleAmount').touched || form.get('saleAmount').dirty) && form.get('saleAmount').errors?.['required']">saleAmount is required</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Total VAT to be remitted (7% of 1.)</label>
+                                <input type="text" class="form-control text-right" placeholder="THB" [formControlName]="'taxAmount'"
+                                [class.is-invalid]="(form.get('taxAmount').touched || form.get('taxAmount').dirty) && 
+                                    (form.get('taxAmount').errors?.['required'] || form.get('taxAmount').errors?.['max'])"
+                                appDecimalMask
+                                >
+                                <span class="invalid-feedback" *ngIf="(form.get('taxAmount').touched || form.get('taxAmount').dirty) && form.get('taxAmount').errors?.['required']">taxAmount is required</span>
+                                <span class="invalid-feedback" *ngIf="(form.get('taxAmount').touched || form.get('taxAmount').dirty) && form.get('taxAmount').errors?.['max']">Invalid Tax</span>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'1'">
+                            <div class="form-group">
+                                <label>Underdeclared Thai taxable electronic service</label>
+                                <input type="text" class="form-control text-right" placeholder="THB" [formControlName]="'saleAmount'"
+                                [class.is-invalid]="(form.get('saleAmount').touched || form.get('saleAmount').dirty) && form.get('saleAmount').errors?.['required']"
+                                appDecimalMask (blur)="calculateTaxAmount()"
+                                >
+                                <span class="invalid-feedback" *ngIf="(form.get('saleAmount').touched || form.get('saleAmount').dirty) && form.get('saleAmount').errors?.['required']">saleAmount is required</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Total VAT to be remitted (7% of 1.)</label>
+                                <input type="text" class="form-control text-right" placeholder="THB" [formControlName]="'taxAmount'"
+                                [class.is-invalid]="(form.get('taxAmount').touched || form.get('taxAmount').dirty) && 
+                                    (form.get('taxAmount').errors?.['required'] || form.get('taxAmount').errors?.['max'])"
+                                appDecimalMask
+                                >
+                                <span class="invalid-feedback" *ngIf="(form.get('taxAmount').touched || form.get('taxAmount').dirty) && form.get('taxAmount').errors?.['required']">taxAmount is required</span>
+                                <span class="invalid-feedback" *ngIf="(form.get('taxAmount').touched || form.get('taxAmount').dirty) && form.get('taxAmount').errors?.['max']">Invalid Tax</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Surcharge</label>
+                                <input type="text" class="form-control text-right" [formControlName]="'surcharge'" readonly appDecimalMask>
+                            </div>
+                            <div class="form-group">
+                                <label>Penalty</label>
+                                <input type="text" class="form-control text-right" [formControlName]="'penalty'" readonly appDecimalMask>
+                            </div>
+                            <div class="form-group">
+                                <label>Total amount of VAT, surcharge, and penalty to be remitted</label>
+                                <input type="text" class="form-control text-right" [formControlName]="'totalAmount'" readonly appDecimalMask>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+                </div>
+            </div>
+            <div class="text-right">
+                <a (click)="submit()" class="btn btn-primary mt-4 text-right">Next</a>
+            </div>
+        </div>
+    </div>
+</div>
